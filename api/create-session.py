@@ -17,8 +17,21 @@ SESSION_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30  # 30 days
 
 def handler(request):
     """Vercel serverless function handler."""
+    # Vercel passes request as dict-like object
+    # Handle both dict and object access
+    if isinstance(request, dict):
+        method = request.get("method", request.get("httpMethod", ""))
+        headers = request.get("headers", {})
+        body_str = request.get("body", "")
+    else:
+        method = getattr(request, "method", getattr(request, "httpMethod", ""))
+        headers = getattr(request, "headers", {})
+        if not isinstance(headers, dict):
+            headers = dict(headers) if hasattr(headers, "items") else {}
+        body_str = getattr(request, "body", "")
+    
     # Handle CORS preflight
-    if request.method == "OPTIONS":
+    if method == "OPTIONS":
         return {
             "statusCode": 200,
             "headers": {
@@ -42,7 +55,6 @@ def handler(request):
     
     # Parse request body
     try:
-        body_str = request.body
         if isinstance(body_str, bytes):
             body_str = body_str.decode("utf-8")
         body = json.loads(body_str) if body_str else {}
@@ -61,13 +73,7 @@ def handler(request):
         }
     
     # Get or create user ID from cookies
-    cookie_header = ""
-    if hasattr(request, "headers"):
-        headers_dict = request.headers
-        if isinstance(headers_dict, dict):
-            cookie_header = headers_dict.get("cookie") or headers_dict.get("Cookie") or ""
-        elif hasattr(headers_dict, "get"):
-            cookie_header = headers_dict.get("cookie") or headers_dict.get("Cookie") or ""
+    cookie_header = headers.get("cookie") or headers.get("Cookie") or ""
     
     cookies = parse_cookies(cookie_header)
     user_id, cookie_value = resolve_user(cookies)
