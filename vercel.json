@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/create-session",
+      "destination": "/api/create-session.py"
+    }
+  ],
+  "functions": {
+    "api/*.py": {
+      "runtime": "python3.11"
+    }
+  }
+}
