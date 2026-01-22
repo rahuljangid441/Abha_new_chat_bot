@@ -1,10 +1,4 @@
 {
   "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist",
-  "rewrites": [
-    {
-      "source": "/api/create-session",
-      "destination": "/api/create-session.py"
-    }
-  ]
+  "outputDirectory": "frontend/dist"
 }
